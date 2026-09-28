@@ -1,6 +1,10 @@
 name = "ideashopec-web"
 compatibility_date = "2026-09-28"
-pages_build_output_dir = "public"
+
+# Sitio 100% estático: no hay Worker script, solo se publica esta carpeta
+# de archivos (equivalente a "assets" en Cloudflare Workers / Pages).
+[assets]
+directory = "public"
 
 # --- D1 (base de datos de pedidos y tokens de descarga) ---
 # Descomenta y completa una vez creada la base con:
