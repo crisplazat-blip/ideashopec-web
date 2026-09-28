@@ -1,0 +1,7 @@
+Carpeta reservada para los futuros endpoints backend (Cloudflare Pages Functions):
+- api/checkout.ts       -> crea la orden e inicia el pago (pasarela o transferencia)
+- api/webhook-pago.ts   -> recibe la confirmación de Payphone / PlacetoPay
+- api/confirmar-transferencia.ts -> uso interno para aprobar transferencias manuales
+- api/descarga/[token].ts -> valida el token (3 usos o 72h) y sirve el PDF desde R2
+
+Por ahora esta carpeta está vacía; el mockup estático funciona sin ella.

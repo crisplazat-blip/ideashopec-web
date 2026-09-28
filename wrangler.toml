@@ -1,0 +1,24 @@
+name = "ideashopec-web"
+compatibility_date = "2026-09-28"
+pages_build_output_dir = "public"
+
+# --- D1 (base de datos de pedidos y tokens de descarga) ---
+# Descomenta y completa una vez creada la base con:
+#   npx wrangler d1 create ideashopec-db
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "ideashopec-db"
+# database_id = "PON-AQUI-EL-ID-QUE-TE-DE-WRANGLER"
+
+# --- R2 (almacenamiento de los PDFs, bucket privado) ---
+# Descomenta y completa una vez creado el bucket con:
+#   npx wrangler r2 bucket create ideashopec-libros
+# [[r2_buckets]]
+# binding = "LIBROS"
+# bucket_name = "ideashopec-libros"
+
+# Nota: las credenciales de la pasarela de pago (Payphone / PlacetoPay) y las
+# llaves del proveedor de correo (Resend/Mailgun/Postmark) NUNCA van en este
+# archivo. Se configuran como "secrets" desde el dashboard de Cloudflare
+# (Pages > Settings > Environment variables) o con:
+#   npx wrangler pages secret put NOMBRE_DEL_SECRETO
