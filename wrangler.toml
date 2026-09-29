@@ -18,7 +18,7 @@ directory = "public"
 [[d1_databases]]
 binding = "DB"
 database_name = "ideashopec-db"
-database_id = "PON-AQUI-EL-ID-QUE-TE-DE-WRANGLER"
+database_id = "63d0199c-a844-412d-a64e-28f86b225e8d"
 
 # --- R2 (almacenamiento de los PDFs, bucket privado) ---
 # Crear el bucket (una sola vez):
