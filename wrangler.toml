@@ -5,10 +5,9 @@ compatibility_date = "2026-09-28"
 # Worker (src/worker.js) que atiende únicamente las rutas /api/*. Cloudflare
 # sirve primero cualquier archivo estático que exista; si la ruta no matchea
 # ningún archivo (como /api/libros), pasa la petición al Worker.
+main = "src/worker.js"
 [assets]
 directory = "public"
-
-main = "src/worker.js"
 
 # --- D1 (pedidos, libros y tokens de descarga) ---
 # 1) Crear la base (una sola vez):
