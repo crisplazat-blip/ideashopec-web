@@ -85,3 +85,4 @@ Cada `git push` a `main` dispara un build automático que ejecuta
   confirmarse un pago, en vez de solo devolver el token en la respuesta.
 - Reemplazar los cuadros de color de portada por imágenes reales (subida de
   portada desde `/admin`, o campo de URL de imagen).
+<!-- prueba build automático -->
