@@ -96,46 +96,8 @@
       <h2 style="font-size:28px;font-weight:700;color:#3A2E1F">Los favoritos de los peques</h2>
       <a href="#" style="font-size:14px;font-weight:800;color:#D85A30">Ver todo el catálogo →</a>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:24px">
-
-      <a href="producto.html" style="display:flex;flex-direction:column;gap:12px">
-        <div style="position:relative;width:100%;aspect-ratio:1/1;border-radius:20px;background:#4FB4E8;display:flex;align-items:center;justify-content:center;color:#042C53;font-size:12px;font-weight:700;text-align:center;padding:12px;box-sizing:border-box">
-          [El bosque de Nico y las estrellas]
-          <span style="position:absolute;top:10px;left:10px;background:#FFC93C;color:#412402;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px">Más vendido</span>
-        </div>
-        <div style="font-size:15px;font-weight:800;color:#3A2E1F">El bosque de Nico y las estrellas</div>
-        <div style="font-size:13px;color:#8A7F6B;font-weight:600">4 a 8 años</div>
-        <div style="font-size:16px;color:#D85A30;font-weight:800">$4,99</div>
-      </a>
-
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div style="position:relative;width:100%;aspect-ratio:1/1;border-radius:20px;background:#5FC77E;display:flex;align-items:center;justify-content:center;color:#173404;font-size:12px;font-weight:700;text-align:center;padding:12px;box-sizing:border-box">
-          [La ballena que quería volar]
-          <span style="position:absolute;top:10px;left:10px;background:#FF7A5C;color:#4A1B0C;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px">Nuevo</span>
-        </div>
-        <div style="font-size:15px;font-weight:800;color:#3A2E1F">La ballena que quería volar</div>
-        <div style="font-size:13px;color:#8A7F6B;font-weight:600">5 a 9 años</div>
-        <div style="font-size:16px;color:#D85A30;font-weight:800">$4,99</div>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div style="width:100%;aspect-ratio:1/1;border-radius:20px;background:#FF7A5C;display:flex;align-items:center;justify-content:center;color:#4A1B0C;font-size:12px;font-weight:700;text-align:center;padding:12px;box-sizing:border-box">
-          [Un dragón sin miedo a la oscuridad]
-        </div>
-        <div style="font-size:15px;font-weight:800;color:#3A2E1F">Un dragón sin miedo a la oscuridad</div>
-        <div style="font-size:13px;color:#8A7F6B;font-weight:600">3 a 7 años</div>
-        <div style="font-size:16px;color:#D85A30;font-weight:800">$4,99</div>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div style="width:100%;aspect-ratio:1/1;border-radius:20px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#412402;font-size:12px;font-weight:700;text-align:center;padding:12px;box-sizing:border-box">
-          [Mi primer día compartiendo]
-        </div>
-        <div style="font-size:15px;font-weight:800;color:#3A2E1F">Mi primer día compartiendo</div>
-        <div style="font-size:13px;color:#8A7F6B;font-weight:600">3 a 6 años</div>
-        <div style="font-size:16px;color:#D85A30;font-weight:800">$3,99</div>
-      </div>
-
+    <div id="catalogo" style="display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:24px">
+      <p style="color:var(--text-muted);font-size:13px;font-weight:700">Cargando libros…</p>
     </div>
   </section>
 
@@ -178,5 +140,40 @@
   </footer>
 
 </div>
+
+<script>
+// Carga el catálogo real desde el backend (Worker + D1) en vez de tenerlo
+// hardcodeado. Los libros se administran desde /admin.
+async function cargarCatalogo() {
+  const cont = document.getElementById("catalogo");
+  try {
+    const res = await fetch("/api/libros");
+    const { libros } = await res.json();
+
+    if (!libros || libros.length === 0) {
+      cont.innerHTML = '<p style="color:var(--text-muted);font-size:13px;font-weight:700">Todavía no hay libros publicados.</p>';
+      return;
+    }
+
+    cont.innerHTML = libros
+      .map(
+        (l) => `
+      <a href="producto.html?slug=${encodeURIComponent(l.slug)}" style="display:flex;flex-direction:column;gap:12px">
+        <div style="position:relative;width:100%;aspect-ratio:1/1;border-radius:20px;background:${l.portada_color};display:flex;align-items:center;justify-content:center;color:#042C53;font-size:12px;font-weight:700;text-align:center;padding:12px;box-sizing:border-box">
+          [${l.titulo}]
+          ${l.etiqueta ? `<span style="position:absolute;top:10px;left:10px;background:#FFC93C;color:#412402;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px">${l.etiqueta}</span>` : ""}
+        </div>
+        <div style="font-size:15px;font-weight:800;color:#3A2E1F">${l.titulo}</div>
+        <div style="font-size:13px;color:#8A7F6B;font-weight:600">${l.edad_desde ?? "?"} a ${l.edad_hasta ?? "?"} años</div>
+        <div style="font-size:16px;color:#D85A30;font-weight:800">$${l.precio}</div>
+      </a>`
+      )
+      .join("");
+  } catch (e) {
+    cont.innerHTML = '<p style="color:var(--text-muted);font-size:13px;font-weight:700">No se pudo cargar el catálogo. Intenta de nuevo más tarde.</p>';
+  }
+}
+cargarCatalogo();
+</script>
 </body>
 </html>

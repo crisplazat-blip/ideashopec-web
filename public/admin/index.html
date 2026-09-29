@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel de administración — ideashop EC</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<style>
+  .card{background:#fff;border:2px solid var(--border);border-radius:20px;padding:24px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:12px;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.03em}
+  .field input, .field textarea, .field select{
+    border:2px solid var(--border);border-radius:12px;padding:10px 14px;font-family:'Nunito',sans-serif;
+    font-size:14px;color:var(--text);background:#fff
+  }
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:8px}
+  td{padding:10px 8px;border-top:2px solid var(--panel);vertical-align:middle}
+  .pill{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:800}
+  .pill.on{background:#EAF3DE;color:#27500A}
+  .pill.off{background:#F6E3DC;color:#7A2E12}
+  .link-btn{background:none;border:none;color:#D85A30;font-weight:800;cursor:pointer;font-size:12.5px;padding:0}
+  #app[hidden], #login[hidden]{display:none}
+</style>
+</head>
+<body>
+
+<div style="max-width:960px;margin:0 auto;padding:40px 24px 80px;display:flex;flex-direction:column;gap:28px">
+
+  <header style="display:flex;align-items:center;justify-content:space-between">
+    <a href="../index.html" style="font-family:'Fredoka',sans-serif;font-size:22px;font-weight:700;color:var(--text)">
+      ideashop<span style="color:var(--accent)">.</span> <span style="font-size:13px;color:var(--text-muted);font-weight:700">admin</span>
+    </a>
+    <button id="btnLogout" class="link-btn" hidden onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <!-- LOGIN -->
+  <div id="login" class="card" style="max-width:360px;margin:60px auto;display:flex;flex-direction:column;gap:16px">
+    <h1 style="font-size:20px">Acceso al panel</h1>
+    <div class="field">
+      <label for="password">Contraseña</label>
+      <input id="password" type="password" placeholder="••••••••">
+    </div>
+    <button class="btn-accent" onclick="login()">Entrar</button>
+    <p id="loginError" style="color:#D85A30;font-size:13px;font-weight:700;display:none"></p>
+  </div>
+
+  <!-- APP -->
+  <div id="app" hidden style="display:flex;flex-direction:column;gap:28px">
+
+    <section class="card" style="display:flex;flex-direction:column;gap:18px">
+      <h2 style="font-size:18px">Agregar libro nuevo</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="field"><label>Slug (para la URL)</label><input id="f_slug" placeholder="ej. bosque-de-nico"></div>
+        <div class="field"><label>Título</label><input id="f_titulo" placeholder="Título del libro"></div>
+        <div class="field" style="grid-column:1/-1"><label>Descripción</label><textarea id="f_descripcion" rows="2"></textarea></div>
+        <div class="field"><label>Precio (USD)</label><input id="f_precio" type="number" step="0.01" placeholder="4.99"></div>
+        <div class="field"><label>Categoría</label><input id="f_categoria" placeholder="Amistad / Aventura / Familia / Emociones"></div>
+        <div class="field"><label>Edad desde</label><input id="f_edad_desde" type="number"></div>
+        <div class="field"><label>Edad hasta</label><input id="f_edad_hasta" type="number"></div>
+        <div class="field"><label>Páginas</label><input id="f_paginas" type="number"></div>
+        <div class="field"><label>Color de portada</label><input id="f_color" type="color" value="#4FB4E8"></div>
+      </div>
+      <button class="btn-accent" style="width:fit-content" onclick="crearLibro()">Guardar libro</button>
+      <p id="crearMsg" style="font-size:13px;font-weight:700;display:none"></p>
+    </section>
+
+    <section class="card" style="display:flex;flex-direction:column;gap:16px">
+      <h2 style="font-size:18px">Catálogo</h2>
+      <table>
+        <thead><tr><th>Título</th><th>Precio</th><th>Estado</th><th>PDF</th><th></th></tr></thead>
+        <tbody id="tablaLibros"></tbody>
+      </table>
+    </section>
+
+    <section class="card" style="display:flex;flex-direction:column;gap:16px">
+      <h2 style="font-size:18px">Pedidos recientes</h2>
+      <table>
+        <thead><tr><th>Código</th><th>Libro</th><th>Email</th><th>Método</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="tablaPedidos"></tbody>
+      </table>
+    </section>
+
+  </div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

@@ -32,8 +32,8 @@
       <div style="display:flex;gap:18px;align-items:center;padding-bottom:22px;border-bottom:2px solid #FBF4E4">
         <div style="width:56px;height:70px;border-radius:12px;background:#4FB4E8;flex-shrink:0"></div>
         <div>
-          <div style="font-size:12px;color:#D85A30;font-weight:800;text-transform:uppercase;letter-spacing:0.04em">Pedido #IE-20481</div>
-          <h1 style="font-size:22px;font-weight:700;margin-top:4px">El bosque de Nico y las estrellas</h1>
+          <div style="font-size:12px;color:#D85A30;font-weight:800;text-transform:uppercase;letter-spacing:0.04em">Tu enlace de descarga</div>
+          <h1 id="tituloLibro" style="font-size:22px;font-weight:700;margin-top:4px">Cargando…</h1>
         </div>
       </div>
 
@@ -54,9 +54,8 @@
             </div>
           </div>
           <div style="flex:1;min-width:180px;background:#FBF4E4;border-radius:16px;padding:18px;text-align:center">
-            <div style="font-size:11px;color:#8A7F6B;font-weight:800;text-transform:uppercase;letter-spacing:0.04em">Tiempo restante</div>
-            <div style="font-size:30px;font-weight:800;color:#3B8BD4;font-family:'Fredoka',sans-serif;margin-top:6px">71h 42m</div>
-            <div style="font-size:11px;color:#8A7F6B;margin-top:10px;font-weight:600">Expira: 1 oct, 2:15 pm</div>
+            <div style="font-size:11px;color:#8A7F6B;font-weight:800;text-transform:uppercase;letter-spacing:0.04em">Expira</div>
+            <div id="expiraTexto" style="font-size:16px;font-weight:800;color:#3B8BD4;font-family:'Fredoka',sans-serif;margin-top:14px">—</div>
           </div>
         </div>
 
@@ -96,32 +95,55 @@
 </div>
 
 <script>
-// Simulación del contador de descargas (3 intentos o 72h, lo que ocurra primero).
-// En producción este estado vive en D1 y se valida en una Cloudflare Function,
-// no en el navegador — aquí solo se representa visualmente el comportamiento.
-let restantes = 3;
+// Contador real de descargas (3 intentos o 72h, lo que ocurra primero).
+// /api/descarga/:token/estado solo consulta (no gasta intento);
+// /api/descarga/:token es la descarga real y sí descuenta uno.
+const token = new URLSearchParams(location.search).get('token');
 let toastTimer = null;
 
-function render() {
-  document.getElementById('contador').textContent = restantes + ' / 3';
-  for (let i = 1; i <= 3; i++) {
-    document.getElementById('dot' + i).classList.toggle('on', i <= restantes);
+async function cargarEstado() {
+  if (!token) {
+    document.getElementById('tituloLibro').textContent = 'Enlace inválido';
+    document.getElementById('estado-activo').hidden = true;
+    return;
   }
-  document.getElementById('estado-activo').hidden = restantes <= 0;
-  document.getElementById('estado-agotado').hidden = restantes > 0;
+  const res = await fetch(`/api/descarga/${encodeURIComponent(token)}/estado`);
+  if (!res.ok) {
+    document.getElementById('tituloLibro').textContent = 'Enlace inválido';
+    document.getElementById('estado-activo').hidden = true;
+    return;
+  }
+  const data = await res.json();
+  document.getElementById('tituloLibro').textContent = data.titulo;
+
+  const restantes = data.intentos_restantes;
+  document.getElementById('contador').textContent = restantes + ' / ' + data.intentos_max;
+  for (let i = 1; i <= data.intentos_max; i++) {
+    const dot = document.getElementById('dot' + i);
+    if (dot) dot.classList.toggle('on', i <= restantes);
+  }
+  document.getElementById('expiraTexto').textContent = new Date(data.expira_en).toLocaleString('es-EC', {
+    day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit',
+  });
+
+  document.getElementById('estado-activo').hidden = !data.disponible;
+  document.getElementById('estado-agotado').hidden = data.disponible;
 }
 
 function descargar() {
-  if (restantes <= 0) return;
-  restantes -= 1;
-  render();
+  if (!token) return;
+  // Navegar directamente a la ruta de descarga: el navegador baja el PDF
+  // y el backend descuenta un intento en ese mismo request.
+  window.location.href = `/api/descarga/${encodeURIComponent(token)}`;
   const toast = document.getElementById('toast');
   toast.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+  // Refresca el contador un momento después (la descarga ya se disparó).
+  setTimeout(cargarEstado, 1200);
 }
 
-render();
+cargarEstado();
 </script>
 </body>
 </html>

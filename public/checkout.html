@@ -53,26 +53,31 @@
       <!-- PASO 1: resumen -->
       <div class="pago-panel" id="panel-resumen">
         <h2 style="font-size:20px;font-weight:700">Resumen de tu pedido</h2>
-        <div style="display:flex;gap:16px;align-items:center;padding-bottom:16px;border-bottom:2px solid #FBF4E4">
+        <div id="resumenLibro" style="display:flex;gap:16px;align-items:center;padding-bottom:16px;border-bottom:2px solid #FBF4E4">
           <div style="width:64px;height:80px;border-radius:12px;background:#4FB4E8;flex-shrink:0"></div>
           <div style="flex:1">
-            <div style="font-size:15px;font-weight:800">El bosque de Nico y las estrellas</div>
+            <div style="font-size:15px;font-weight:800">Cargando…</div>
             <div style="font-size:13px;color:#8A7F6B;font-weight:600">Libro digital · PDF</div>
           </div>
-          <div style="font-size:16px;font-weight:800;color:#D85A30">$4,99</div>
+          <div id="resumenPrecio" style="font-size:16px;font-weight:800;color:#D85A30"></div>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:17px;font-weight:800">
           <span>Total a pagar</span>
-          <span style="color:#D85A30">$4,99</span>
+          <span id="resumenTotal" style="color:#D85A30"></span>
         </div>
-        <button class="btn-accent" onclick="goTo('metodo')">Continuar al pago</button>
+        <div class="field" style="display:flex;flex-direction:column;gap:6px">
+          <label for="email" style="font-size:12px;font-weight:800;color:#8A7F6B;text-transform:uppercase;letter-spacing:.03em">Tu correo (ahí recibirás el enlace de descarga)</label>
+          <input id="email" type="email" placeholder="tucorreo@ejemplo.com" style="border:2px solid #F1E4C6;border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px">
+        </div>
+        <p id="resumenError" style="color:#D85A30;font-size:13px;font-weight:700;display:none"></p>
+        <button class="btn-accent" onclick="goToMetodo()">Continuar al pago</button>
       </div>
 
       <!-- PASO 2: elegir método -->
       <div class="pago-panel" id="panel-metodo" hidden>
         <h2 style="font-size:20px;font-weight:700">¿Cómo quieres pagar?</h2>
 
-        <button class="metodo-btn" onclick="goTo('pasarela')">
+        <button class="metodo-btn" onclick="elegirMetodo('pasarela')">
           <div style="width:44px;height:44px;border-radius:12px;background:#4FB4E8;flex-shrink:0;display:flex;align-items:center;justify-content:center">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#042C53" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
           </div>
@@ -83,7 +88,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A7F6B" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
         </button>
 
-        <button class="metodo-btn" onclick="goTo('transferencia')">
+        <button class="metodo-btn" onclick="elegirMetodo('transferencia')">
           <div style="width:44px;height:44px;border-radius:12px;background:#5FC77E;flex-shrink:0;display:flex;align-items:center;justify-content:center">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#173404" stroke-width="2"><rect x="1" y="7" width="15" height="10" rx="1"/><path d="M16 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="18.5" cy="19" r="1.6"/></svg>
           </div>
@@ -93,6 +98,7 @@
           </div>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A7F6B" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
         </button>
+        <p id="metodoError" style="color:#D85A30;font-size:13px;font-weight:700;display:none"></p>
       </div>
 
       <!-- PASO 3a: pasarela en curso -->
@@ -104,8 +110,8 @@
         <p style="font-size:14px;color:#6B5D48;max-width:380px;line-height:1.6;font-weight:600">
           Aquí el sitio real abre el formulario seguro de la pasarela (ej. Payphone o PlacetoPay) para que ingreses los datos de tu tarjeta.
         </p>
-        <button class="btn-accent" onclick="goTo('confirmado-pasarela')">Simular pago aprobado →</button>
-        <span style="font-size:12px;color:#B4B2A9;font-weight:600">(botón solo de demostración del mockup)</span>
+        <button class="btn-accent" onclick="simularPasarelaOk()">Simular pago aprobado →</button>
+        <span style="font-size:12px;color:#B4B2A9;font-weight:600">(botón solo de demostración del mockup; en el sitio real esto lo confirma la pasarela)</span>
       </div>
 
       <!-- PASO 3b: transferencia -->
@@ -116,7 +122,8 @@
           <div><strong>Cuenta de ahorros:</strong> 22XXXXXXXX01</div>
           <div><strong>Titular:</strong> ideashop EC Cía. Ltda.</div>
           <div><strong>RUC:</strong> 17XXXXXXXX001</div>
-          <div><strong>Valor:</strong> $4,99</div>
+          <div><strong>Valor:</strong> <span id="transferenciaValor"></span></div>
+          <div><strong>Referencia:</strong> <span id="transferenciaCodigo"></span> <span style="font-weight:600;color:#8A7F6B">(inclúyela en el comprobante)</span></div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px">
           <span style="font-size:13px;font-weight:800">Comprobante de depósito</span>
@@ -124,7 +131,7 @@
             [Adjuntar foto o PDF del comprobante]
           </div>
         </div>
-        <button class="btn-accent" onclick="goTo('confirmado-transferencia')">Enviar comprobante</button>
+        <button class="btn-accent" onclick="enviarComprobante()">Enviar comprobante</button>
       </div>
 
       <!-- PASO 4a: confirmado por pasarela -->
@@ -136,7 +143,7 @@
         <p style="font-size:14px;color:#6B5D48;max-width:380px;line-height:1.6;font-weight:600">
           Tu pago fue confirmado al instante. Ya generamos tu enlace de descarga y lo enviamos a tu correo.
         </p>
-        <a href="descarga.html" class="btn-accent">Ver el enlace de descarga →</a>
+        <a id="linkDescargaPasarela" href="#" class="btn-accent">Ver el enlace de descarga →</a>
       </div>
 
       <!-- PASO 4b: en revisión por transferencia -->
@@ -146,9 +153,9 @@
         </div>
         <h2 style="font-size:20px;font-weight:700">Comprobante recibido</h2>
         <p style="font-size:14px;color:#6B5D48;max-width:400px;line-height:1.6;font-weight:600">
-          Estamos verificando tu transferencia. En cuanto se confirme (máximo 24 horas hábiles) recibirás tu enlace de descarga por correo.
+          Estamos verificando tu transferencia. En cuanto se confirme (máximo 24 horas hábiles) recibirás tu enlace de descarga por correo. Tu código de pedido es <strong id="confirmTransferCodigo"></strong>.
         </p>
-        <a href="descarga.html" class="btn-outline">Ver cómo se verá tu enlace →</a>
+        <a href="index.html" class="btn-outline">Volver al catálogo</a>
       </div>
 
     </div>
@@ -172,18 +179,22 @@
 </div>
 
 <script>
-// Máquina de estados del checkout (equivalente al mockup original).
-// pasos: resumen -> metodo -> pasarela|transferencia -> confirmado-pasarela|confirmado-transferencia
+// Máquina de estados del checkout, ahora conectada al backend real
+// (Worker + D1): crea el pedido, y según el método, confirma el pago
+// (simulado para pasarela) o deja el pedido pendiente de revisión manual
+// (transferencia), generando el token real de descarga (3 intentos / 72h).
+
 const PANELS = ['resumen', 'metodo', 'pasarela', 'transferencia', 'confirmado-pasarela', 'confirmado-transferencia'];
+const slug = new URLSearchParams(location.search).get('slug');
+let libroActual = null;
+let pedidoCodigo = null;
 
 function goTo(step) {
   PANELS.forEach(p => {
     document.getElementById('panel-' + p).hidden = (p !== step);
   });
-
   const step2Done = step !== 'resumen';
   const step3Done = step === 'confirmado-pasarela' || step === 'confirmado-transferencia';
-
   setStepVisual('circle2', 'label2', step2Done);
   setStepVisual('circle3', 'label3', step3Done);
 }
@@ -193,7 +204,92 @@ function setStepVisual(circleId, labelId, done) {
   document.getElementById(labelId).classList.toggle('done', done);
 }
 
+async function cargarResumen() {
+  if (!slug) {
+    document.getElementById('resumenError').textContent = 'No se indicó qué libro comprar.';
+    document.getElementById('resumenError').style.display = 'block';
+    return;
+  }
+  const res = await fetch(`/api/libros/${encodeURIComponent(slug)}`);
+  if (!res.ok) {
+    document.getElementById('resumenError').textContent = 'No encontramos ese libro.';
+    document.getElementById('resumenError').style.display = 'block';
+    return;
+  }
+  const { libro } = await res.json();
+  libroActual = libro;
+  document.querySelector('#resumenLibro > div:nth-child(2) > div:first-child').textContent = libro.titulo;
+  document.getElementById('resumenPrecio').textContent = '$' + libro.precio;
+  document.getElementById('resumenTotal').textContent = '$' + libro.precio;
+}
+
+function goToMetodo() {
+  const email = document.getElementById('email').value.trim();
+  const err = document.getElementById('resumenError');
+  if (!email || !email.includes('@')) {
+    err.textContent = 'Ingresa un correo válido para poder enviarte el enlace de descarga.';
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  goTo('metodo');
+}
+
+async function crearPedido(metodo) {
+  const email = document.getElementById('email').value.trim();
+  const res = await fetch('/api/checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slug, email, metodo }),
+  });
+  if (!res.ok) throw new Error('No se pudo crear el pedido');
+  const { pedido } = await res.json();
+  pedidoCodigo = pedido.codigo;
+  return pedido;
+}
+
+async function elegirMetodo(metodo) {
+  const errEl = document.getElementById('metodoError');
+  errEl.style.display = 'none';
+  try {
+    await crearPedido(metodo);
+    if (metodo === 'pasarela') {
+      goTo('pasarela');
+    } else {
+      document.getElementById('transferenciaValor').textContent = '$' + (libroActual ? libroActual.precio : '');
+      document.getElementById('transferenciaCodigo').textContent = pedidoCodigo;
+      goTo('transferencia');
+    }
+  } catch (e) {
+    errEl.textContent = 'No se pudo iniciar el pago. Intenta de nuevo.';
+    errEl.style.display = 'block';
+  }
+}
+
+// Simula la confirmación que en el sitio real llega desde Payphone/PlacetoPay
+// (webhook). Aquí la disparamos manualmente solo para ver el flujo completo.
+async function simularPasarelaOk() {
+  const res = await fetch('/api/pago/webhook-pasarela', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ codigo: pedidoCodigo, referencia: 'DEMO-' + Date.now() }),
+  });
+  if (!res.ok) return;
+  const { token } = await res.json();
+  document.getElementById('linkDescargaPasarela').href = `descarga.html?token=${encodeURIComponent(token)}`;
+  goTo('confirmado-pasarela');
+}
+
+function enviarComprobante() {
+  // El pedido ya quedó "pendiente" en /api/checkout; la confirmación real
+  // la hace un administrador desde /admin (botón "Confirmar pago"), lo que
+  // genera el token de descarga y (en producción) dispara el correo.
+  document.getElementById('confirmTransferCodigo').textContent = pedidoCodigo;
+  goTo('confirmado-transferencia');
+}
+
 // Estado inicial
+cargarResumen();
 goTo('resumen');
 </script>
 </body>

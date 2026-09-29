@@ -23,46 +23,75 @@
     </div>
   </header>
 
-  <section style="padding:24px 64px 48px;display:flex;gap:56px;box-sizing:border-box;flex-wrap:wrap">
-
-    <div style="width:400px;max-width:100%;height:480px;flex-shrink:0;border-radius:28px;background:#4FB4E8;display:flex;align-items:center;justify-content:center;color:#042C53;font-size:14px;font-weight:700;text-align:center;padding:24px;box-sizing:border-box;position:relative">
-      [Portada: "El bosque de Nico y las estrellas"]
-      <div style="position:absolute;bottom:-16px;left:32px;background:var(--accent);color:#412402;font-size:13px;font-weight:800;padding:8px 18px;border-radius:20px;box-shadow:0 4px 0 #BA7517">Más vendido</div>
-    </div>
-
-    <div style="flex:1;min-width:300px;display:flex;flex-direction:column;gap:18px;padding-top:8px">
-      <span style="background:#5FC77E;color:#173404;font-size:12px;font-weight:800;padding:6px 16px;border-radius:20px;width:fit-content">Libro digital · PDF</span>
-      <h1 style="font-size:36px;font-weight:700;line-height:1.2;color:#3A2E1F">El bosque de Nico y las estrellas</h1>
-      <p style="font-size:15px;line-height:1.7;color:#6B5D48;max-width:480px;font-weight:600">
-        Un cuento ilustrado para niños de 4 a 8 años sobre la amistad y la noche. 28 páginas a todo color, listo para leer en cualquier dispositivo o imprimir en casa.
-      </p>
-
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <span style="background:#FFFFFF;border:2px solid #F1E4C6;color:#6B5D48;font-size:12px;font-weight:800;padding:8px 16px;border-radius:20px">PDF</span>
-        <span style="background:#FFFFFF;border:2px solid #F1E4C6;color:#6B5D48;font-size:12px;font-weight:800;padding:8px 16px;border-radius:20px">28 páginas</span>
-        <span style="background:#FFFFFF;border:2px solid #F1E4C6;color:#6B5D48;font-size:12px;font-weight:800;padding:8px 16px;border-radius:20px">Descarga inmediata</span>
-      </div>
-
-      <div style="font-size:34px;font-weight:800;color:#D85A30;font-family:'Fredoka',sans-serif;margin-top:6px">$4,99</div>
-
-      <a href="checkout.html" class="btn-accent" style="width:fit-content">Comprar este libro</a>
-
-      <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;padding:20px;background:#FFFFFF;border:2px solid #F1E4C6;border-radius:18px;max-width:460px">
-        <div style="display:flex;gap:10px;align-items:flex-start">
-          <div style="width:22px;height:22px;border-radius:50%;background:#5FC77E;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#173404" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
-          <span style="font-size:13px;color:#6B5D48;font-weight:700">Recibirás el enlace de descarga en tu correo apenas se confirme el pago</span>
-        </div>
-        <div style="display:flex;gap:10px;align-items:flex-start">
-          <div style="width:22px;height:22px;border-radius:50%;background:#5FC77E;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#173404" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
-          <span style="font-size:13px;color:#6B5D48;font-weight:700">El enlace permite 3 descargas o 72 horas de acceso, lo que ocurra primero</span>
-        </div>
-      </div>
-    </div>
+  <section id="ficha" style="padding:24px 64px 48px;display:flex;gap:56px;box-sizing:border-box;flex-wrap:wrap">
+    <p style="color:var(--text-muted);font-size:13px;font-weight:700">Cargando…</p>
   </section>
 </div>
+
+<script>
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+async function cargarFicha() {
+  const cont = document.getElementById("ficha");
+  const slug = new URLSearchParams(location.search).get("slug");
+
+  if (!slug) {
+    cont.innerHTML = '<p style="color:var(--text-muted);font-size:13px;font-weight:700">No se indicó qué libro mostrar. <a href="index.html" style="color:#D85A30;font-weight:800">Volver al catálogo</a></p>';
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/libros/${encodeURIComponent(slug)}`);
+    if (!res.ok) {
+      cont.innerHTML = '<p style="color:var(--text-muted);font-size:13px;font-weight:700">No encontramos ese libro. <a href="index.html" style="color:#D85A30;font-weight:800">Volver al catálogo</a></p>';
+      return;
+    }
+    const { libro: l } = await res.json();
+    document.title = `${l.titulo} — ideashop EC`;
+
+    cont.innerHTML = `
+      <div style="width:400px;max-width:100%;height:480px;flex-shrink:0;border-radius:28px;background:${l.portada_color};display:flex;align-items:center;justify-content:center;color:#042C53;font-size:14px;font-weight:700;text-align:center;padding:24px;box-sizing:border-box;position:relative">
+        [Portada: "${escapeHtml(l.titulo)}"]
+        ${l.etiqueta ? `<div style="position:absolute;bottom:-16px;left:32px;background:var(--accent);color:#412402;font-size:13px;font-weight:800;padding:8px 18px;border-radius:20px;box-shadow:0 4px 0 #BA7517">${escapeHtml(l.etiqueta)}</div>` : ""}
+      </div>
+
+      <div style="flex:1;min-width:300px;display:flex;flex-direction:column;gap:18px;padding-top:8px">
+        <span style="background:#5FC77E;color:#173404;font-size:12px;font-weight:800;padding:6px 16px;border-radius:20px;width:fit-content">Libro digital · PDF</span>
+        <h1 style="font-size:36px;font-weight:700;line-height:1.2;color:#3A2E1F">${escapeHtml(l.titulo)}</h1>
+        <p style="font-size:15px;line-height:1.7;color:#6B5D48;max-width:480px;font-weight:600">${escapeHtml(l.descripcion)}</p>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <span style="background:#FFFFFF;border:2px solid #F1E4C6;color:#6B5D48;font-size:12px;font-weight:800;padding:8px 16px;border-radius:20px">PDF</span>
+          <span style="background:#FFFFFF;border:2px solid #F1E4C6;color:#6B5D48;font-size:12px;font-weight:800;padding:8px 16px;border-radius:20px">${l.paginas ?? "—"} páginas</span>
+          <span style="background:#FFFFFF;border:2px solid #F1E4C6;color:#6B5D48;font-size:12px;font-weight:800;padding:8px 16px;border-radius:20px">Descarga inmediata</span>
+        </div>
+
+        <div style="font-size:34px;font-weight:800;color:#D85A30;font-family:'Fredoka',sans-serif;margin-top:6px">$${l.precio}</div>
+
+        <a href="checkout.html?slug=${encodeURIComponent(l.slug)}" class="btn-accent" style="width:fit-content">Comprar este libro</a>
+
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;padding:20px;background:#FFFFFF;border:2px solid #F1E4C6;border-radius:18px;max-width:460px">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="width:22px;height:22px;border-radius:50%;background:#5FC77E;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#173404" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <span style="font-size:13px;color:#6B5D48;font-weight:700">Recibirás el enlace de descarga en tu correo apenas se confirme el pago</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="width:22px;height:22px;border-radius:50%;background:#5FC77E;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#173404" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <span style="font-size:13px;color:#6B5D48;font-weight:700">El enlace permite 3 descargas o 72 horas de acceso, lo que ocurra primero</span>
+          </div>
+        </div>
+      </div>`;
+  } catch (e) {
+    cont.innerHTML = '<p style="color:var(--text-muted);font-size:13px;font-weight:700">Error al cargar el libro.</p>';
+  }
+}
+cargarFicha();
+</script>
 </body>
 </html>

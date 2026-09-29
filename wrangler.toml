@@ -1,28 +1,41 @@
 name = "ideashopec-web"
 compatibility_date = "2026-09-28"
 
-# Sitio 100% estático: no hay Worker script, solo se publica esta carpeta
-# de archivos (equivalente a "assets" en Cloudflare Workers / Pages).
+# El sitio se sirve como archivos estáticos (esta carpeta), y además hay un
+# Worker (src/worker.js) que atiende únicamente las rutas /api/*. Cloudflare
+# sirve primero cualquier archivo estático que exista; si la ruta no matchea
+# ningún archivo (como /api/libros), pasa la petición al Worker.
 [assets]
 directory = "public"
 
-# --- D1 (base de datos de pedidos y tokens de descarga) ---
-# Descomenta y completa una vez creada la base con:
-#   npx wrangler d1 create ideashopec-db
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "ideashopec-db"
-# database_id = "PON-AQUI-EL-ID-QUE-TE-DE-WRANGLER"
+main = "src/worker.js"
+
+# --- D1 (pedidos, libros y tokens de descarga) ---
+# 1) Crear la base (una sola vez):
+#      npx wrangler d1 create ideashopec-db
+#    Eso imprime un database_id — cópialo abajo.
+# 2) Aplicar el esquema:
+#      npx wrangler d1 execute ideashopec-db --remote --file=./db/schema.sql
+[[d1_databases]]
+binding = "DB"
+database_name = "ideashopec-db"
+database_id = "PON-AQUI-EL-ID-QUE-TE-DE-WRANGLER"
 
 # --- R2 (almacenamiento de los PDFs, bucket privado) ---
-# Descomenta y completa una vez creado el bucket con:
+# Crear el bucket (una sola vez):
 #   npx wrangler r2 bucket create ideashopec-libros
-# [[r2_buckets]]
-# binding = "LIBROS"
-# bucket_name = "ideashopec-libros"
+[[r2_buckets]]
+binding = "LIBROS"
+bucket_name = "ideashopec-libros"
 
-# Nota: las credenciales de la pasarela de pago (Payphone / PlacetoPay) y las
-# llaves del proveedor de correo (Resend/Mailgun/Postmark) NUNCA van en este
-# archivo. Se configuran como "secrets" desde el dashboard de Cloudflare
-# (Pages > Settings > Environment variables) o con:
-#   npx wrangler pages secret put NOMBRE_DEL_SECRETO
+# --- Secrets (NUNCA van escritos en este archivo ni en el repo) ---
+# ADMIN_PASSWORD  -> contraseña para entrar a /admin
+# SESSION_SECRET  -> cadena aleatoria larga, usada para firmar la sesión del admin
+# Se configuran así (una vez que el proyecto ya existe en Cloudflare):
+#   npx wrangler secret put ADMIN_PASSWORD
+#   npx wrangler secret put SESSION_SECRET
+# o desde el dashboard: Workers & Pages > ideashopec-web > Settings > Variables and Secrets
+#
+# Más adelante, cuando se conecte la pasarela de pago real y el envío de
+# correo, sus credenciales (Payphone/PlacetoPay, Resend/Mailgun/Postmark)
+# se agregan de la misma forma, nunca como texto plano en el repo.
